@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import "antd/dist/reset.css";
 
 // ✅ Correct way (VITE/REACT) to load image
-import bgImage from "../assets/images/bg pic.avif";
+import bgImage from "../assets/images/bg_pic.avif";
 
 export default function Signup() {
   const navigate = useNavigate();
