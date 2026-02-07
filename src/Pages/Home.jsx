@@ -20,8 +20,7 @@ const Home = () => {
       }
     };
 
-    const timer = setTimeout(fetchProducts, 2000);
-    return () => clearTimeout(timer);
+    fetchProducts();
   }, []);
 
   if (loading) {
@@ -41,12 +40,12 @@ const Home = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-4 gap-6">
           {products.map((item) => {
-            // ✅ SAFE image handling (Cloudinary ready)
+            // 🔥 FIXED: backend media URL (MOST IMPORTANT LINE)
             const imageUrl =
               item.images &&
               item.images.length > 0 &&
               item.images[0].image
-                ? item.images[0].image
+                ? `https://full-stack-project-6-g1yc.onrender.com${item.images[0].image}`
                 : "/placeholder.png";
 
             return (

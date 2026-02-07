@@ -4,6 +4,8 @@ import axiosInstance from "../api/axiosInstance";
 import { CartContext } from "../Context/CartContext";
 import { WishlistContext } from "../Context/WishlistContext";
 
+const BASE_URL = "https://full-stack-project-6-g1yc.onrender.com";
+
 export default function ProductDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -25,11 +27,11 @@ export default function ProductDetails() {
         const data = res.data;
         setProduct(data);
 
-        // ✅ Image handling (Cloudinary + normal)
+        // ✅ FIX: absolute media URL
         if (data.images && data.images.length > 0) {
-          setMainImage(data.images[0].image);
+          setMainImage(`${BASE_URL}${data.images[0].image}`);
         } else if (data.image) {
-          setMainImage(data.image);
+          setMainImage(`${BASE_URL}${data.image}`);
         } else {
           setMainImage("/placeholder.png");
         }
@@ -102,25 +104,31 @@ export default function ProductDetails() {
       {/* 🖼 Images */}
       <div className="flex gap-4">
         <div className="flex flex-col gap-3">
-          {product.images?.map((img) => (
-            <img
-              key={img.id}
-              src={img.image}
-              onClick={() => setMainImage(img.image)}
-              className={`w-20 h-20 object-cover rounded-lg border cursor-pointer ${
-                mainImage === img.image
-                  ? "border-blue-600"
-                  : "border-gray-300"
-              }`}
-              alt=""
-            />
-          ))}
+          {product.images?.map((img) => {
+            const imgUrl = `${BASE_URL}${img.image}`;
+
+            return (
+              <img
+                key={img.id}
+                src={imgUrl}
+                onClick={() => setMainImage(imgUrl)}
+                className={`w-20 h-20 object-cover rounded-lg border cursor-pointer ${
+                  mainImage === imgUrl
+                    ? "border-blue-600"
+                    : "border-gray-300"
+                }`}
+                alt=""
+                onError={(e) => (e.target.src = "/placeholder.png")}
+              />
+            );
+          })}
         </div>
 
         <img
           src={mainImage}
           alt={product.name}
           className="w-96 h-[420px] object-cover rounded-xl shadow"
+          onError={(e) => (e.target.src = "/placeholder.png")}
         />
       </div>
 
