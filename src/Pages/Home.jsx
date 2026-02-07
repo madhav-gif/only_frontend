@@ -20,7 +20,6 @@ const Home = () => {
       }
     };
 
-    // ⏳ Delay added to wake up Render backend
     const timer = setTimeout(fetchProducts, 2000);
     return () => clearTimeout(timer);
   }, []);
@@ -41,35 +40,51 @@ const Home = () => {
         <p className="text-gray-500">No products available.</p>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-4 gap-6">
-          {products.map((item) => (
-            <div
-              key={item.id}
-              className="border rounded-lg shadow hover:shadow-lg p-4"
-            >
-              <Link to={`/product/${item.id}`}>
-                <img
-                  src={item.images?.[0]?.image || "/placeholder.png"}
-                  alt={item.name}
-                  className="w-full h-64 object-cover rounded"
-                />
-                <h2 className="text-lg font-semibold mt-2">{item.name}</h2>
-                <p className="text-gray-600">₹{item.price}</p>
-              </Link>
+          {products.map((item) => {
+            // ✅ SAFE image handling (Cloudinary ready)
+            const imageUrl =
+              item.images &&
+              item.images.length > 0 &&
+              item.images[0].image
+                ? item.images[0].image
+                : "/placeholder.png";
 
-              <button
-                onClick={() =>
-                  addToCart(
-                    item.id,
-                    item.colors?.[0] || "default",
-                    item.sizes?.[0] || "M"
-                  )
-                }
-                className="mt-3 bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 transition w-full"
+            return (
+              <div
+                key={item.id}
+                className="border rounded-lg shadow hover:shadow-lg p-4"
               >
-                Add to Cart 🛒
-              </button>
-            </div>
-          ))}
+                <Link to={`/product/${item.id}`}>
+                  <img
+                    src={imageUrl}
+                    alt={item.name}
+                    className="w-full h-64 object-cover rounded"
+                    onError={(e) => {
+                      e.target.src = "/placeholder.png";
+                    }}
+                  />
+
+                  <h2 className="text-lg font-semibold mt-2">
+                    {item.name}
+                  </h2>
+                  <p className="text-gray-600">₹{item.price}</p>
+                </Link>
+
+                <button
+                  onClick={() =>
+                    addToCart(
+                      item.id,
+                      item.colors?.[0] || "default",
+                      item.sizes?.[0] || "M"
+                    )
+                  }
+                  className="mt-3 bg-orange-600 text-white px-4 py-2 rounded hover:bg-orange-700 transition w-full"
+                >
+                  Add to Cart 🛒
+                </button>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

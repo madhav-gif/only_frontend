@@ -25,7 +25,8 @@ export default function ProductDetails() {
         const data = res.data;
         setProduct(data);
 
-        if (data.images?.length > 0) {
+        // ✅ Image handling (Cloudinary + normal)
+        if (data.images && data.images.length > 0) {
           setMainImage(data.images[0].image);
         } else if (data.image) {
           setMainImage(data.image);
@@ -56,13 +57,21 @@ export default function ProductDetails() {
   const handleAddToCart = () => {
     if (!requireLogin()) return;
 
-    if (!selectedColor ) {
+    if (!selectedColor) {
       alert("Please select color");
       return;
     }
 
     addToCart(product.id, selectedColor, selectedSize);
   };
+
+  // 🔍 Check cart item
+  const cartItem = cart?.find(
+    (c) =>
+      c.product.id === product.id &&
+      c.selected_color === selectedColor &&
+      (c.selected_size || "") === (selectedSize || "")
+  );
 
   // ❌ Remove from cart
   const handleRemoveFromCart = () => {
@@ -88,14 +97,6 @@ export default function ProductDetails() {
     );
   }
 
-  // 🔍 Check product + variant in cart
-  const cartItem = cart?.find(
-    (c) =>
-      c.product.id === product.id &&
-      c.selected_color === selectedColor &&
-      (c.selected_size || "") === (selectedSize || "")
-  );
-
   return (
     <div className="p-6 flex flex-col md:flex-row gap-10">
       {/* 🖼 Images */}
@@ -111,6 +112,7 @@ export default function ProductDetails() {
                   ? "border-blue-600"
                   : "border-gray-300"
               }`}
+              alt=""
             />
           ))}
         </div>
@@ -183,15 +185,14 @@ export default function ProductDetails() {
           {cartItem ? (
             <button
               onClick={handleRemoveFromCart}
-              disabled={!selectedColor}
-              className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700 transition"
+              className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700"
             >
               Remove from Cart ❌
             </button>
           ) : (
             <button
               onClick={handleAddToCart}
-              className="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700 transition"
+              className="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700"
             >
               Add to Cart 🛒
             </button>
@@ -199,7 +200,7 @@ export default function ProductDetails() {
 
           <button
             onClick={handleWishlist}
-            className="bg-blue-700 text-white px-6 py-3 rounded-lg hover:bg-blue-900 transition"
+            className="bg-blue-700 text-white px-6 py-3 rounded-lg hover:bg-blue-900"
           >
             ❤️ Wishlist
           </button>
