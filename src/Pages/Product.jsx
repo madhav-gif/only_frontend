@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
-import axiosInstance from "../api/axiosInstance";
 import { Link } from "react-router-dom";
+import axiosInstance, { BACKEND_URL } from "../api/axiosInstance";
 
 export default function Product() {
   const [products, setProducts] = useState([]);
@@ -9,19 +9,21 @@ export default function Product() {
     axiosInstance
       .get("/products/")
       .then((res) => setProducts(res.data))
-      .catch((err) => console.log(err));
+      .catch((err) => console.log("Error:", err));
   }, []);
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-6">All Products</h1>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {products.map((item) => {
-          // 🔥 IMPORTANT FIX: absolute media URL
+          // ✅ FINAL IMAGE FIX
           const imageUrl =
-            item.images && item.images.length > 0 && item.images[0].image
-              ? `https://full-stack-project-6-g1yc.onrender.com${item.images[0].image}`
+            item.images &&
+            item.images.length > 0 &&
+            item.images[0].image
+              ? `${BACKEND_URL}${item.images[0].image}`
               : "/placeholder.png";
 
           return (
@@ -31,7 +33,9 @@ export default function Product() {
                   src={imageUrl}
                   alt={item.name}
                   className="h-52 w-full object-cover"
-                  onError={(e) => (e.target.src = "/placeholder.png")}
+                  onError={(e) => {
+                    e.target.src = "/placeholder.png";
+                  }}
                 />
 
                 <div className="p-4">

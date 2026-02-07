@@ -19,7 +19,6 @@ export default function ProductDetails() {
   const [selectedSize, setSelectedSize] = useState("");
   const [loading, setLoading] = useState(true);
 
-  // 🔹 Fetch product
   useEffect(() => {
     axiosInstance
       .get(`/products/${id}/`)
@@ -27,27 +26,18 @@ export default function ProductDetails() {
         const data = res.data;
         setProduct(data);
 
-        // ✅ FIX: absolute media URL
-        if (data.images && data.images.length > 0) {
+        if (data.images?.length > 0) {
           setMainImage(`${BASE_URL}${data.images[0].image}`);
-        } else if (data.image) {
-          setMainImage(`${BASE_URL}${data.image}`);
         } else {
           setMainImage("/placeholder.png");
         }
-
         setLoading(false);
       })
-      .catch((err) => {
-        console.log("Product fetch error:", err);
-        setLoading(false);
-      });
+      .catch(() => setLoading(false));
   }, [id]);
 
-  // 🔐 Login check
   const requireLogin = () => {
-    const token = localStorage.getItem("access");
-    if (!token) {
+    if (!localStorage.getItem("access")) {
       alert("Please login first");
       navigate("/login");
       return false;
@@ -55,19 +45,12 @@ export default function ProductDetails() {
     return true;
   };
 
-  // 🛒 Add to cart
   const handleAddToCart = () => {
     if (!requireLogin()) return;
-
-    if (!selectedColor) {
-      alert("Please select color");
-      return;
-    }
-
+    if (!selectedColor) return alert("Select color");
     addToCart(product.id, selectedColor, selectedSize);
   };
 
-  // 🔍 Check cart item
   const cartItem = cart?.find(
     (c) =>
       c.product.id === product.id &&
@@ -75,49 +58,24 @@ export default function ProductDetails() {
       (c.selected_size || "") === (selectedSize || "")
   );
 
-  // ❌ Remove from cart
-  const handleRemoveFromCart = () => {
-    if (!cartItem) return;
-    removeFromCart(cartItem.id);
-  };
-
-  // ❤️ Wishlist
-  const handleWishlist = () => {
-    if (!requireLogin()) return;
-    addToWishlist(product.id);
-  };
-
-  if (loading) {
-    return <h1 className="text-center mt-10 text-xl">Loading...</h1>;
-  }
-
-  if (!product) {
-    return (
-      <h1 className="text-center mt-10 text-red-600">
-        Product not found
-      </h1>
-    );
-  }
+  if (loading) return <h1 className="text-center mt-10">Loading...</h1>;
+  if (!product) return <h1 className="text-center mt-10">Not found</h1>;
 
   return (
     <div className="p-6 flex flex-col md:flex-row gap-10">
-      {/* 🖼 Images */}
+      {/* Images */}
       <div className="flex gap-4">
         <div className="flex flex-col gap-3">
           {product.images?.map((img) => {
             const imgUrl = `${BASE_URL}${img.image}`;
-
             return (
               <img
                 key={img.id}
                 src={imgUrl}
                 onClick={() => setMainImage(imgUrl)}
                 className={`w-20 h-20 object-cover rounded-lg border cursor-pointer ${
-                  mainImage === imgUrl
-                    ? "border-blue-600"
-                    : "border-gray-300"
+                  mainImage === imgUrl ? "border-blue-600" : "border-gray-300"
                 }`}
-                alt=""
                 onError={(e) => (e.target.src = "/placeholder.png")}
               />
             );
@@ -126,89 +84,60 @@ export default function ProductDetails() {
 
         <img
           src={mainImage}
-          alt={product.name}
           className="w-96 h-[420px] object-cover rounded-xl shadow"
           onError={(e) => (e.target.src = "/placeholder.png")}
         />
       </div>
 
-      {/* 📦 Product Info */}
+      {/* Info */}
       <div className="md:w-1/2">
         <h1 className="text-3xl font-bold">{product.name}</h1>
+        <p className="text-2xl text-blue-600 mt-4">₹{product.price}</p>
+        <p className="mt-4">{product.description}</p>
 
-        <p className="text-2xl text-blue-600 font-semibold mt-4">
-          ₹{product.price}
-        </p>
-
-        <p className="mt-4 text-gray-700">
-          {product.description}
-        </p>
-
-        {/* 🎨 Colors */}
+        {/* Colors */}
         {product.colors?.length > 0 && (
           <div className="mt-6">
-            <h3 className="font-semibold">Available Colors</h3>
+            <h3 className="font-semibold">Colors</h3>
             <div className="flex gap-3 mt-2 flex-wrap">
-              {product.colors.map((color, idx) => (
+              {product.colors.map((c, i) => (
                 <span
-                  key={idx}
-                  onClick={() => setSelectedColor(color)}
+                  key={i}
+                  onClick={() => setSelectedColor(c)}
                   className={`px-4 py-2 border rounded-lg cursor-pointer ${
-                    selectedColor === color
+                    selectedColor === c
                       ? "bg-black text-white"
                       : "hover:bg-gray-200"
                   }`}
                 >
-                  {color}
+                  {c}
                 </span>
               ))}
             </div>
           </div>
         )}
 
-        {/* 📏 Sizes */}
-        {product.sizes?.length > 0 && (
-          <div className="mt-6">
-            <h3 className="font-semibold">Available Sizes</h3>
-            <div className="flex gap-3 mt-2 flex-wrap">
-              {product.sizes.map((size, idx) => (
-                <span
-                  key={idx}
-                  onClick={() => setSelectedSize(size)}
-                  className={`px-4 py-2 border rounded-lg cursor-pointer ${
-                    selectedSize === size
-                      ? "bg-blue-600 text-white"
-                      : "hover:bg-gray-200"
-                  }`}
-                >
-                  {size}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* 🔘 Actions */}
+        {/* Buttons */}
         <div className="flex gap-6 mt-10">
           {cartItem ? (
             <button
-              onClick={handleRemoveFromCart}
-              className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700"
+              onClick={() => removeFromCart(cartItem.id)}
+              className="bg-red-600 text-white px-6 py-3 rounded-lg"
             >
-              Remove from Cart ❌
+              Remove ❌
             </button>
           ) : (
             <button
               onClick={handleAddToCart}
-              className="bg-orange-600 text-white px-6 py-3 rounded-lg hover:bg-orange-700"
+              className="bg-orange-600 text-white px-6 py-3 rounded-lg"
             >
               Add to Cart 🛒
             </button>
           )}
 
           <button
-            onClick={handleWishlist}
-            className="bg-blue-700 text-white px-6 py-3 rounded-lg hover:bg-blue-900"
+            onClick={() => requireLogin() && addToWishlist(product.id)}
+            className="bg-blue-700 text-white px-6 py-3 rounded-lg"
           >
             ❤️ Wishlist
           </button>

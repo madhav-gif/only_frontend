@@ -1,7 +1,10 @@
 import axios from "axios";
 
+export const BACKEND_URL =
+  "https://full-stack-project-6-g1yc.onrender.com";
+
 const axiosInstance = axios.create({
-  baseURL: "https://full-stack-project-6-g1yc.onrender.com/api/",
+  baseURL: `${BACKEND_URL}/api/`,
   headers: { "Content-Type": "application/json" },
 });
 
