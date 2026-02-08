@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import axiosInstance, { BACKEND_URL } from "../api/axiosInstance";
+import axiosInstance from "../api/axiosInstance";
 
 export default function Product() {
   const [products, setProducts] = useState([]);
@@ -18,13 +18,15 @@ export default function Product() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
         {products.map((item) => {
-          // ✅ FINAL IMAGE FIX
-          const imageUrl =
+          // ✅ IMAGE LOGIC (Cloudinary-safe)
+          const img =
             item.images &&
             item.images.length > 0 &&
-            item.images[0].image
-              ? `${BACKEND_URL}${item.images[0].image}`
-              : "/placeholder.png";
+            item.images[0].image;
+
+          const imageUrl = img && img.startsWith("http")
+            ? img                 // Cloudinary full URL
+            : "/placeholder.png"; // fallback
 
           return (
             <Link to={`/product/${item.id}`} key={item.id}>
@@ -34,6 +36,7 @@ export default function Product() {
                   alt={item.name}
                   className="h-52 w-full object-cover"
                   onError={(e) => {
+                    e.target.onerror = null;
                     e.target.src = "/placeholder.png";
                   }}
                 />

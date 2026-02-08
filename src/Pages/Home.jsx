@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from "react";
 import { Link } from "react-router-dom";
-import axiosInstance, { BACKEND_URL } from "../api/axiosInstance";
+import axiosInstance from "../api/axiosInstance";
 import { CartContext } from "../Context/CartContext";
 
 const Home = () => {
@@ -40,12 +40,15 @@ const Home = () => {
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 2xl:grid-cols-4 gap-6">
           {products.map((item) => {
-            // ✅ IMAGE URL FIX (MOST IMPORTANT)
-            const imageUrl =
+            // ✅ CORRECT IMAGE LOGIC (Cloudinary-safe)
+            const img =
               item.images &&
               item.images.length > 0 &&
-              item.images[0].image
-                ? `${BACKEND_URL}${item.images[0].image}`
+              item.images[0].image;
+
+            const imageUrl =
+              img && img.startsWith("http")
+                ? img
                 : "/placeholder.png";
 
             return (
@@ -59,6 +62,7 @@ const Home = () => {
                     alt={item.name}
                     className="w-full h-64 object-cover rounded"
                     onError={(e) => {
+                      e.target.onerror = null;
                       e.target.src = "/placeholder.png";
                     }}
                   />

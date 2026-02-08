@@ -4,8 +4,6 @@ import axiosInstance from "../api/axiosInstance";
 import { CartContext } from "../Context/CartContext";
 import { WishlistContext } from "../Context/WishlistContext";
 
-const BASE_URL = "https://full-stack-project-6-g1yc.onrender.com";
-
 export default function ProductDetails() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -26,11 +24,15 @@ export default function ProductDetails() {
         const data = res.data;
         setProduct(data);
 
-        if (data.images?.length > 0) {
-          setMainImage(`${BASE_URL}${data.images[0].image}`);
-        } else {
-          setMainImage("/placeholder.png");
-        }
+        const img =
+          data.images &&
+          data.images.length > 0 &&
+          data.images[0].image;
+
+        setMainImage(
+          img && img.startsWith("http") ? img : "/placeholder.png"
+        );
+
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -67,14 +69,20 @@ export default function ProductDetails() {
       <div className="flex gap-4">
         <div className="flex flex-col gap-3">
           {product.images?.map((img) => {
-            const imgUrl = `${BASE_URL}${img.image}`;
+            const imgUrl =
+              img.image && img.image.startsWith("http")
+                ? img.image
+                : "/placeholder.png";
+
             return (
               <img
                 key={img.id}
                 src={imgUrl}
                 onClick={() => setMainImage(imgUrl)}
                 className={`w-20 h-20 object-cover rounded-lg border cursor-pointer ${
-                  mainImage === imgUrl ? "border-blue-600" : "border-gray-300"
+                  mainImage === imgUrl
+                    ? "border-blue-600"
+                    : "border-gray-300"
                 }`}
                 onError={(e) => (e.target.src = "/placeholder.png")}
               />
